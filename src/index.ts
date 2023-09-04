@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import express from 'express'
+import redis from './lib/cache'
 
 const prisma = new PrismaClient()
 
@@ -10,22 +11,41 @@ app.use(express.json())
 app.use(express.raw({ type: 'application/vnd.custom-type' }))
 app.use(express.text({ type: 'text/html' }))
 
-app.get('/artists', async (req, res) => {
-  const todos = await prisma.artist.findMany()
+const cacheKey = 'artists:al'
 
-  res.json(todos)
+app.get('/artists', async (req, res) => {
+  try {
+    const cachedArtists = await redis.get(cacheKey)
+
+    if (cachedArtists) {
+      return res.json(JSON.parse(cachedArtists))
+    }
+
+    const artists = await prisma.artist.findMany()
+    await redis.set(cacheKey, JSON.stringify(artists))
+
+    return res.json(artists)
+  } catch (error) {
+    return res.json({ error: error })
+  }
 })
 
 app.post('/artist', async (req, res) => {
   const { name } = req.body
 
-  const todo = await prisma.artist.create({
-    data: {
-      name
-    }
-  })
+  try {
+    const todo = await prisma.artist.create({
+      data: {
+        name
+      }
+    })
 
-  return res.json(todo)
+    redis.del(cacheKey)
+
+    return res.json(todo)
+  } catch (error) {
+    return res.json({ error: error })
+  }
 })
 
 app.get('/', async (req, res) => {
