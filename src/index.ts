@@ -54,8 +54,8 @@ app.get('/', async (req, res) => {
   <h1>Todo REST API</h1>
   <h2>Available Routes</h2>
   <pre>
-    GET, POST /todos
-    GET, PUT, DELETE /todos/:id
+    GET, POST /artists
+    GET, PUT, DELETE /artists/:id
   </pre>
   `.trim()
   )
