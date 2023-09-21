@@ -14,3 +14,21 @@ model Artist {
   id        String   @id @default(uuid())
   name String
 }
+
+model User {
+  user_id   Int      @id @default(autoincrement())
+  username  String
+  password  String
+  email     String
+  created_at DateTime @default(now())
+  links     Link[]   
+}
+
+model Link {
+  link_id      Int      @id @default(autoincrement())
+  original_url String
+  short_url    String
+  user_id      Int?
+  created_at   DateTime @default(now())
+  user         User?    @relation(fields: [user_id], references: [user_id])
+}
