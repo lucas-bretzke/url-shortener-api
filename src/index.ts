@@ -73,10 +73,9 @@ app.post('/artist', async (req, res) => {
 })
 
 app.get('/:code', async (req, res) => {
-  const code = req.params.code as string
+  const code = req.params.code
 
   try {
-    // Consulte o link com base na chave primária link_id
     const link = await prisma.link.findUnique({
       where: { link_id: parseInt(code) }
     })
@@ -131,6 +130,21 @@ app.post('/newShortUrl', async (req, res) => {
   }
 })
 
+app.get('/userLinks/:userId', async (req, res) => {
+  try {
+    const id = parseInt(req.params.userId)
+
+    const links = await prisma.link.findMany({
+      where: { user_id: id }
+    })
+
+    res.send([links])
+  } catch (error) {
+    console.error('Erro ao buscar usuários:', error)
+    res.status(500).send('Erro interno do servidor')
+  }
+})
+
 app.post('/user', async (req, res) => {
   try {
     const userData: CreateUserInput = req.body
@@ -151,16 +165,32 @@ app.post('/user', async (req, res) => {
 app.get('/users', async (req, res) => {
   try {
     const users = await prisma.user.findMany()
-
-    return res.json(users)
+    res.json(users)
   } catch (error) {
     console.error('Erro ao buscar usuários:', error)
-    return res.status(500).send('Erro interno do servidor')
+    res.status(500).send('Erro interno do servidor')
   }
 })
 
-app.get('/', async (req, res) => {
-  res.send(`<h1>API Rodando!</h1>`.trim())
+// Rota para buscar um usuário pelo ID
+app.get('/users/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id)
+
+    // Consulte o usuário com base no ID
+    const user = await prisma.user.findUnique({
+      where: { user_id: id }
+    })
+
+    if (!user) {
+      res.status(404).send('Usuário não encontrado')
+    } else {
+      res.json(user)
+    }
+  } catch (error) {
+    console.error('Erro ao buscar usuário pelo ID:', error)
+    res.status(500).send('Erro interno do servidor')
+  }
 })
 
 app.listen(port, '0.0.0.0', () => {
