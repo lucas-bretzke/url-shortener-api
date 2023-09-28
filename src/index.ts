@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import express from 'express'
 import redis from './lib/cache'
 import { z } from 'zod'
+import jwt from 'jsonwebtoken'
 
 const prisma = new PrismaClient()
 
@@ -149,8 +150,6 @@ app.post('/user', async (req, res) => {
   try {
     const userData: CreateUserInput = req.body
 
-    // Adicione validação de dados aqui, por exemplo, verificando se os campos obrigatórios estão presentes e se o email é único.
-
     const newUser = await prisma.user.create({
       data: userData
     })
@@ -172,7 +171,6 @@ app.get('/users', async (req, res) => {
   }
 })
 
-// Rota para buscar um usuário pelo ID
 app.get('/users/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id)
@@ -190,6 +188,42 @@ app.get('/users/:id', async (req, res) => {
   } catch (error) {
     console.error('Erro ao buscar usuário pelo ID:', error)
     res.status(500).send('Erro interno do servidor')
+  }
+})
+
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body
+
+    // Consultar usuário com base no email
+    const user = await prisma.user.findFirst({
+      where: { email: email }
+    })
+
+    if (!user) {
+      res.status(401).json({ error: 'Usuário não encontrado' })
+      return
+    }
+
+    if (user.password !== password) {
+      res.status(401).json({ error: 'Credenciais inválidas' })
+      return
+    }
+
+    const token = jwt.sign({ userId: user.user_id }, 'secretpassword')
+
+    res.json({ user, token })
+  } catch (error) {
+    console.error('Erro no login:', error)
+    res.status(500).json({ error: 'Erro interno do servidor' })
+  }
+})
+
+app.get('/', async (req, res) => {
+  try {
+    res.send(`<h3>API Rodando!</h3>`.trim())
+  } catch (error) {
+    res.status(500).send(`<h3>Erro interno do servidor</h3>`.trim())
   }
 })
 
