@@ -146,9 +146,12 @@ app.get('/userLinks/:userId', async (req, res) => {
   }
 })
 
+// Rota para criar um novo usuário
 app.post('/user', async (req, res) => {
   try {
     const userData: CreateUserInput = req.body
+
+    userData.email = userData.email.toLowerCase()
 
     const userAlreadyExist = await prisma.user.findFirst({
       where: { email: userData.email }
@@ -248,6 +251,6 @@ app.get('/', async (req, res) => {
   }
 })
 
-app.listen(port, '192.168.0.14', () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on http://192.168.0.14:${port}`)
 })
