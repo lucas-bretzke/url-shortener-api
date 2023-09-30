@@ -150,6 +150,14 @@ app.post('/user', async (req, res) => {
   try {
     const userData: CreateUserInput = req.body
 
+    const userAlreadyExist = await prisma.user.findFirst({
+      where: { email: userData.email }
+    })
+
+    if (userAlreadyExist) {
+      return res.status(401).send('Este email já está cadastrado')
+    }
+
     const newUser = await prisma.user.create({
       data: userData
     })
