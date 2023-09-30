@@ -188,13 +188,26 @@ app.get('/users/:id', async (req, res) => {
       where: { user_id: id }
     })
 
-    if (!user) {
-      res.status(404).send('Usuário não encontrado')
-    } else {
-      res.json(user)
-    }
+    user ? res.json(user) : res.status(404).send('Usuário não encontrado')
   } catch (error) {
     console.error('Erro ao buscar usuário pelo ID:', error)
+    res.status(500).send('Erro interno do servidor')
+  }
+})
+
+app.get('/users/email/:email', async (req, res) => {
+  try {
+    const email = req.params.email
+
+    const user = await prisma.user.findFirst({
+      where: { email: email }
+    })
+
+    user
+      ? res.status(200).send('Usuário encontrado')
+      : res.status(404).send('Usuário não encontrado')
+  } catch (error) {
+    console.error('Erro ao buscar usuário pelo email:', error)
     res.status(500).send('Erro interno do servidor')
   }
 })
@@ -235,6 +248,6 @@ app.get('/', async (req, res) => {
   }
 })
 
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Server is running on http://localhost:${port}`)
+app.listen(port, '192.168.0.14', () => {
+  console.log(`Server is running on http://192.168.0.14:${port}`)
 })
