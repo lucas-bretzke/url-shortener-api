@@ -215,13 +215,17 @@ app.get('/users/email/:email', async (req, res) => {
   }
 })
 
+// Rota para login
 app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body
 
+    // Converta o email para letras minúsculas
+    const lowercaseEmail = email.toLowerCase()
+
     // Consultar usuário com base no email
     const user = await prisma.user.findFirst({
-      where: { email: email }
+      where: { email: lowercaseEmail }
     })
 
     if (!user) {
