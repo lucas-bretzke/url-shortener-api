@@ -113,7 +113,7 @@ app.post('/newShortUrl', async (req, res) => {
       return
     }
 
-    const short_url = `${process.env.BACKEND_API_URL}${code}`
+    const short_url = `${process.env.BACKEND_API_URL}/${code}`
 
     // Crie o novo link com a short_url definida
     await prisma.link.create({
