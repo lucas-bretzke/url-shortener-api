@@ -5,18 +5,24 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 const shortUrl = Router()
 
-// Rota para criar um novo link
+/**
+ * Types.
+ */
+const createLinkSchema = z.object({
+  original_url: z.string().url(),
+  code: z.string().optional(),
+  user_id: z.number()
+})
+
+/**
+ * Rota para criar um novo link encurtado.
+ * POST /shortUrl/
+ */
 shortUrl.post('/', async (req, res) => {
   try {
-    const createLinkSchema = z.object({
-      original_url: z.string().url(),
-      code: z.string().optional(),
-      user_id: z.number()
-    })
-
     const { original_url, code, user_id } = createLinkSchema.parse(req.body)
 
-    // Verifique se o usuário com o user_id especificado existe no banco de dados
+    // Verifica se o usuário com o user_id especificado existe no banco de dados.
     const user = await prisma.user.findUnique({
       where: { user_id }
     })
@@ -28,7 +34,7 @@ shortUrl.post('/', async (req, res) => {
 
     const short_url = `${process.env.BACKEND_API_URL}/${code}`
 
-    // Crie o novo link com a short_url definida
+    // Cria o novo link com a short_url definida.
     await prisma.link.create({
       data: {
         original_url,
@@ -44,7 +50,10 @@ shortUrl.post('/', async (req, res) => {
   }
 })
 
-// Deletar short_url
+/**
+ * Rota para deletar um link encurtado.
+ * DELETE /shortUrl/:id
+ */
 shortUrl.delete('/:id', async (req, res) => {
   try {
     const id = Number(req.params.id)
@@ -69,6 +78,10 @@ shortUrl.delete('/:id', async (req, res) => {
   }
 })
 
+/**
+ * Rota para buscar links encurtados de um usuário com base no ID do usuário.
+ * GET /shortUrl/:userId
+ */
 shortUrl.get('/:userId', async (req, res) => {
   try {
     const id = parseInt(req.params.userId)
@@ -77,12 +90,11 @@ shortUrl.get('/:userId', async (req, res) => {
       where: { user_id: id }
     })
 
-    res.send([links])
+    res.json(links)
   } catch (error) {
-    console.error('Erro ao buscar usuários:', error)
+    console.error('Erro ao buscar links encurtados:', error)
     res.status(500).send('Erro interno do servidor')
   }
 })
-
 
 export default shortUrl

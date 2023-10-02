@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 const userRouter = Router()
 
 /**
- * Define o tipo de entrada para criar um novo usuário.
+ * Types.
  */
 type CreateUserInput = {
   username: string
