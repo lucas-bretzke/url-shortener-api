@@ -18,11 +18,15 @@ app.use(express.raw({ type: 'application/vnd.custom-type' }))
 app.use(express.text({ type: 'text/html' }))
 
 
+// Rotas para funcionalidades de URLs encurtadas
 app.use('/shortUrl', shortUrl)
 
+// Rotas para funcionalidades relacionadas a usuários
 app.use('/user', userResolvers)
 
+// Rotas para funcionalidades de autenticação
 app.use('/auth', auth)
+
 
 app.get('/:code', async (req, res) => {
   const code = req.params.code
