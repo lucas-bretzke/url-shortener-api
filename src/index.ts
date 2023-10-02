@@ -82,7 +82,7 @@ app.get('/:code', async (req, res) => {
     })
 
     if (!link) {
-      res.status(404).send('Link not found')
+      res.status(404).send('URL not found')
     } else {
       res.redirect(link.original_url)
     }
@@ -93,7 +93,7 @@ app.get('/:code', async (req, res) => {
 })
 
 // Rota para criar um novo link
-app.post('/newShortUrl', async (req, res) => {
+app.post('/shortUrl', async (req, res) => {
   try {
     const createLinkSchema = z.object({
       original_url: z.string().url(),
@@ -124,9 +124,34 @@ app.post('/newShortUrl', async (req, res) => {
       }
     })
 
-    res.status(201).send('Link criado com sucesso')
+    return res.status(201).send('Link criado com sucesso')
   } catch (error) {
     console.error('Erro no post:', error)
+    res.status(500).send('Erro interno do servidor')
+  }
+})
+
+// Deletar short_url
+app.delete('/shortUrl/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+
+    const link = await prisma.link.findFirst({
+      where: { link_id: id }
+    })
+
+    if (!link) {
+      res.status(404).send('URL not found')
+      return
+    }
+
+    await prisma.link.delete({
+      where: { link_id: link.link_id }
+    })
+
+    return res.status(204).send('short_url deleted')
+  } catch (error) {
+    console.error('Erro na exclusão do link:', error)
     res.status(500).send('Erro interno do servidor')
   }
 })
