@@ -5,8 +5,8 @@ import { PrismaClient } from '@prisma/client'
  * Resolvers.
  */
 import userResolvers from './resolvers/user-resolvers'
-import shortUrl from './resolvers/shortened-urls-resolver'
-import auth from './resolvers/auth-resolver'
+import shortUrl from './resolvers/shortened-urls-resolvers'
+import auth from './resolvers/auth-resolvers'
 
 const prisma = new PrismaClient()
 
