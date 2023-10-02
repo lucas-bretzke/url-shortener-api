@@ -4,19 +4,27 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 const userRouter = Router()
 
+/**
+ * Define o tipo de entrada para criar um novo usuário.
+ */
 type CreateUserInput = {
   username: string
   password: string
   email: string
 }
 
-// Rota para criar um novo usuário
+/**
+ * Rota para criar um novo usuário.
+ * POST /user/
+ */
 userRouter.post('/', async (req, res) => {
   try {
     const userData: CreateUserInput = req.body
 
+    // Converta o email para letras minúsculas antes de verificar a existência.
     userData.email = userData.email.toLowerCase()
 
+    // Verifica se o usuário já existe com o email fornecido.
     const userAlreadyExist = await prisma.user.findFirst({
       where: { email: userData.email }
     })
@@ -36,32 +44,47 @@ userRouter.post('/', async (req, res) => {
   }
 })
 
+/**
+ * Rota para consultar todos os usuários.
+ * GET /user/
+ */
 userRouter.get('/', async (req, res) => {
   try {
     const users = await prisma.user.findMany()
-    res.json(users)
+    return res.json(users)
   } catch (error) {
     console.error('Erro ao buscar usuários:', error)
-    res.status(500).send('Erro interno do servidor')
+    return res.status(500).send('Erro interno do servidor')
   }
 })
 
+/**
+ * Rota para consultar o usuário com base no ID.
+ * GET /user/:id
+ */
 userRouter.get('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id)
 
-    // Consulte o usuário com base no ID
     const user = await prisma.user.findUnique({
       where: { user_id: id }
     })
 
-    user ? res.json(user) : res.status(404).send('Usuário não encontrado')
+    if (user) {
+      return res.json(user)
+    } else {
+      return res.status(404).send('Usuário não encontrado')
+    }
   } catch (error) {
     console.error('Erro ao buscar usuário pelo ID:', error)
-    res.status(500).send('Erro interno do servidor')
+    return res.status(500).send('Erro interno do servidor')
   }
 })
 
+/**
+ * Rota para consultar o usuário com base no email.
+ * GET /user/email/:email
+ */
 userRouter.get('/email/:email', async (req, res) => {
   try {
     const email = req.params.email
@@ -70,12 +93,14 @@ userRouter.get('/email/:email', async (req, res) => {
       where: { email: email }
     })
 
-    user
-      ? res.status(200).send('Usuário encontrado')
-      : res.status(404).send('Usuário não encontrado')
+    if (user) {
+      return res.status(200).send('Usuário encontrado')
+    } else {
+      return res.status(404).send('Usuário não encontrado')
+    }
   } catch (error) {
     console.error('Erro ao buscar usuário pelo email:', error)
-    res.status(500).send('Erro interno do servidor')
+    return res.status(500).send('Erro interno do servidor')
   }
 })
 
