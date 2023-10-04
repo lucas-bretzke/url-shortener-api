@@ -28,7 +28,7 @@ app.use('/auth', auth)
 
 app.get('/:code', async (req, res) => {
   const code = req.params.code
-  const fullUrl = `http://192.168.0.14:3000/${code}`
+  const fullUrl = `https://bretz.up.railway.app/${code}`
 
   try {
     const link = await prisma.link.findFirst({
@@ -55,7 +55,6 @@ app.get('/:code', async (req, res) => {
   }
 })
 
-
 app.get('/', async (req, res) => {
   try {
     res.send(`<h3>API Rodando!</h3>`.trim())
@@ -67,6 +66,6 @@ app.get('/', async (req, res) => {
 /**
  * Server start.
  */
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, '192.168.0.14', () => {
   console.log(`Server is running on http://192.168.0.14:${port}`)
 })
