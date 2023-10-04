@@ -10,8 +10,10 @@ const shortUrl = Router()
  */
 const createLinkSchema = z.object({
   original_url: z.string().url(),
-  code: z.string().optional(),
-  user_id: z.number()
+  code: z.string(),
+  user_id: z.number(),
+  is_favorite: z.boolean().optional().default(false),
+  description: z.string()
 })
 
 /**
@@ -20,7 +22,8 @@ const createLinkSchema = z.object({
  */
 shortUrl.post('/', async (req, res) => {
   try {
-    const { original_url, code, user_id } = createLinkSchema.parse(req.body)
+    const { original_url, code, user_id, is_favorite, description } =
+      createLinkSchema.parse(req.body)
 
     // Verifica se o usuário com o user_id especificado existe no banco de dados.
     const user = await prisma.user.findUnique({
@@ -37,9 +40,11 @@ shortUrl.post('/', async (req, res) => {
     // Cria o novo link com a short_url definida.
     await prisma.link.create({
       data: {
-        original_url,
+        user_id,
         short_url,
-        user_id
+        is_favorite,
+        description,
+        original_url
       }
     })
 
@@ -47,6 +52,34 @@ shortUrl.post('/', async (req, res) => {
   } catch (error) {
     console.error('Erro no post:', error)
     res.status(500).send('Erro interno do servidor')
+  }
+})
+
+// Rota para atualizar um link encurtado.
+// PUT /shortUrl/:id
+shortUrl.put('/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+    const { is_favorite, description } = req.body
+
+    const link = await prisma.link.findUnique({
+      where: { link_id: id }
+    })
+
+    if (!link) return res.status(404).send('Link not found')
+
+    await prisma.link.update({
+      where: { link_id: id },
+      data: {
+        is_favorite,
+        description
+      }
+    })
+
+    res.status(200).send('Link updated successfully')
+  } catch (error) {
+    console.error('Error in PUT:', error)
+    res.status(500).send('Internal Server Error')
   }
 })
 
