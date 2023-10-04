@@ -28,27 +28,25 @@ app.use('/auth', auth)
 
 app.get('/:code', async (req, res) => {
   const code = req.params.code
-  const fullUrl = `https://bretz.up.railway.app/${code}`
+  const fullUrl = `bretz.up.railway.app/${code}`
 
   try {
     const link = await prisma.link.findFirst({
       where: { short_url: fullUrl }
     })
 
-    if (!link) {
-      res.status(404).send('URL not found')
-    } else {
-      await prisma.link.update({
-        where: { link_id: link.link_id },
-        data: {
-          access_count: {
-            increment: 1
-          }
-        }
-      })
+    if (!link) return res.status(404).send('URL not found')
 
-      res.redirect(link.original_url)
-    }
+    await prisma.link.update({
+      where: { link_id: link.link_id },
+      data: {
+        access_count: {
+          increment: 1
+        }
+      }
+    })
+
+    res.redirect(link.original_url)
   } catch (error) {
     console.log('get error', error)
     res.status(500).send('Internal Server Error')
