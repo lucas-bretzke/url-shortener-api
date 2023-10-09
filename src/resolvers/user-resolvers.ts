@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
+const bcrypt = require('bcrypt')
 
 const prisma = new PrismaClient()
 const userRouter = Router()
@@ -19,22 +20,28 @@ type CreateUserInput = {
  */
 userRouter.post('/', async (req, res) => {
   try {
-    const userData: CreateUserInput = req.body
+    const { username, email, password }: CreateUserInput = req.body
 
-    // Converta o email para letras minúsculas antes de verificar a existência.
-    userData.email = userData.email.toLowerCase()
+    // Converte o email para letras minúsculas antes de verificar a existência.
+    const dataEmail = email.toLowerCase()
 
     // Verifica se o usuário já existe com o email fornecido.
     const userAlreadyExist = await prisma.user.findFirst({
-      where: { email: userData.email }
+      where: { email: dataEmail }
     })
 
     if (userAlreadyExist) {
       return res.status(401).send('Este email já está cadastrado')
     }
 
+    // Hash da senha durante o registro
+    const saltRounds = 10
+
+    // Agora 'passwordHash' contém o hash gerado da senha
+    const passwordHash = await bcrypt.hash(password, saltRounds)
+
     const newUser = await prisma.user.create({
-      data: userData
+      data: { password: passwordHash, email: dataEmail, username: username }
     })
 
     return res.status(201).json(newUser)
