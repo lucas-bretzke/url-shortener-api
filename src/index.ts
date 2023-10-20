@@ -64,6 +64,7 @@ app.get('/', async (req, res) => {
 /**
  * Server start.
  */
-app.listen(port, '192.168.0.14', () => {
-  console.log(`Server is running on http://192.168.0.14:${port}`)
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running on http://0.0.0.0:${port}`)
 })
+
