@@ -11,7 +11,8 @@ import auth from './resolvers/auth-resolvers'
 const prisma = new PrismaClient()
 
 const app = express()
-const port = Number(process.env.PORT || 3000)
+const port = Number(process.env.PORT || 8080)
+const ipAddress = '192.168.0.4'
 
 app.use(express.json())
 app.use(express.raw({ type: 'application/vnd.custom-type' }))
@@ -64,7 +65,6 @@ app.get('/', async (req, res) => {
 /**
  * Server start.
  */
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Server is running on http://0.0.0.0:${port}`)
+app.listen(port, ipAddress, () => {
+  console.log(`Server is running on http://192.168.0.4:${port}`)
 })
-
