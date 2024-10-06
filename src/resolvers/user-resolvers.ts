@@ -58,7 +58,7 @@ userRouter.post('/', async (req, res) => {
 userRouter.get('/', async (req, res) => {
   try {
     const users = await prisma.user.findMany()
-    return res.json(users)
+    return res.json({users})
   } catch (error) {
     console.error('Erro ao buscar usuários:', error)
     return res.status(500).send('Erro interno do servidor')

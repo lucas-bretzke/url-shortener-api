@@ -62,9 +62,22 @@ app.get('/', async (req, res) => {
   }
 })
 
+
+async function checkDatabaseConnection() {
+  try {
+    await prisma.$connect()
+    console.log('Conexão com o banco de dados estabelecida com sucesso!')
+  } catch (error) {
+    console.error('Erro ao conectar ao banco de dados:', error)
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
 /**
  * Server start.
  */
 app.listen(port, ipAddress, () => {
   console.log(`Server is running on http://localhost:${port}`)
+  checkDatabaseConnection()
 })
